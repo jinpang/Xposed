@@ -16,6 +16,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="Xposed所有模块的集合" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="53" />
     </application>
 
 </manifest>
