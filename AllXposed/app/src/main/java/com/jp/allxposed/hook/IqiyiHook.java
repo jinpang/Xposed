@@ -9,7 +9,6 @@ public class IqiyiHook {
     public static final String PACKAGE_NAME = "com.qiyi.video";
 
     public static void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
-        //iqiyi
         if (loadPackageParam.packageName.equals(PACKAGE_NAME)) {
             XposedHelpers.findAndHookMethod("org.qiyi.android.coreplayer.b.aux", loadPackageParam.classLoader, "isLogin", new XC_MethodHook() {
                 @Override
