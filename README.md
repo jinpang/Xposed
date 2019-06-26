@@ -8,3 +8,6 @@ Xposed官方git上面有几个开源项目，包括XposedInstaller、Xposed、Xp
 2、Android逆向-脱壳，dumpDex， 一个开源的 Android 脱壳插件工具，需要在 Xposed 环境中使用，支持市面上大多数加密壳，参考：http://liteng1220.com/blog/articles/dumpdex-principle/
 
 3、Xposed详解：https://www.infoq.cn/article/android-in-depth-xposed/
+
+4、查找Android应用当前界面所对应的activity名称
+adb shell dumpsys activity | grep "Running activities" -A 7
