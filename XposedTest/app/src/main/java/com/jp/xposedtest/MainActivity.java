@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 SharedPreferenceUtils.setParam(MainActivity.this, "is_open", b);
             }
         });
-        boolean isOpen = (boolean) SharedPreferenceUtils.getParam(this, "is_open", Boolean.FALSE);
+        boolean isOpen = (boolean) SharedPreferenceUtils.getParam(this, "is_open", Boolean.TRUE);
         swOpen.setChecked(isOpen);
         index = (int) SharedPreferenceUtils.getParam(this, "index", 0);
         etInput.setText(index + "");

@@ -12,6 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.jp.xposedtest.bean.IndexItemBean;
+import com.jp.xposedtest.touch.GestureTouchUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +37,7 @@ public class HookTest implements IXposedHookLoadPackage {
             if (xSharedPreferences == null) {
                 xSharedPreferences = new XSharedPreferences(BuildConfig.APPLICATION_ID, SharedPreferenceUtils.FILE_NAME);
             }
-            boolean isOpen = xSharedPreferences.getBoolean("is_open", false);
+            boolean isOpen = xSharedPreferences.getBoolean("is_open", true);
             if (isOpen) {
                 XposedHelpers.findAndHookConstructor("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, Context.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
@@ -46,11 +48,6 @@ public class HookTest implements IXposedHookLoadPackage {
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         if (listView == null) {
                             listView = ((ListView) param.thisObject);
-                            String t = "listView!";
-                            if (listView.getParent() != null){
-                                t = t + " Parent1:" + listView.getParent();
-                            }
-                            XposedBridge.log(t);
                             final int position = xSharedPreferences.getInt("index", 0);
                             listView.postDelayed(new Runnable() {
                                 @Override
@@ -60,25 +57,48 @@ public class HookTest implements IXposedHookLoadPackage {
 //                            listView.performItemClick(listView.getChildAt(position), position, listView.getItemIdAtPosition(position));
                                         int count = listAdapter.getCount();
                                         if (position < count){
+                                            String t = "listView!";
+                                            if (listView.getParent() != null){
+                                                t = t + " Parent1:" + listView.getParent();
+                                                if (listView.getParent().getParent() != null){
+                                                    t = t + " Parent2:" + listView.getParent().getParent();
+                                                    if (listView.getParent().getParent().getParent() != null){
+                                                        t = t + " Parent3:" + listView.getParent().getParent().getParent();
+                                                        if (listView.getParent().getParent().getParent() != null){
+                                                            t = t + " Parent3:" + listView.getParent().getParent().getParent();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            XposedBridge.log(t);
                                             //listView.smoothScrollToPosition(position);
-                                            listView.scrollListBy(500);
+                                            //listView.scrollListBy(500);
                                             //listView.smoothScrollToPositionFromTop(position, 0, 300);
+                                            GestureTouchUtils.simulateScroll(listView, 30, 0, 30, 500);
                                             listView.postDelayed(new Runnable() {
                                                 @Override
                                                 public void run() {
                                                     //listView.setSelection(position);
                                                     listView.performItemClick(listView.getChildAt(position), position, listView.getItemIdAtPosition(position));
                                                 }
-                                            }, 300 + 50);
+                                            }, 2000 + 50);
                                             Object o = listAdapter.getItem(position);
                                             Gson gson = new Gson();
                                             String json = gson.toJson(o);
-                                            Intent intent = new Intent(XposedReceiver.ACTION_ITEM);
-                                            Bundle data = new Bundle();
-                                            data.putString("item", json);
-                                            intent.putExtras(data);
-                                            listView.getContext().sendBroadcast(intent);
+                                            sendData(listView.getContext(), XposedReceiver.ACTION_ITEM, "item", json);
                                             XposedBridge.log("list count:" + count + ", item:" + o + ", json:" + json);
+                                            StringBuffer buffer = new StringBuffer("titles:");
+                                            for (int i=0; i<count; i++){
+                                                Object o2 = listAdapter.getItem(i);
+                                                if (o2 != null) {
+                                                    String os = gson.toJson(o2);
+                                                    XposedBridge.log(os);
+                                                    IndexItemBean ucIndexItemBean = gson.fromJson(os, IndexItemBean.class);
+                                                    if (ucIndexItemBean != null) {
+                                                        buffer.append(ucIndexItemBean.toString()).append("\n");
+                                                    }
+                                                }
+                                            }
                                         }else {
                                             listView.smoothScrollToPosition(count);
                                             XposedBridge.log("list count:" + count + ", position:" + position);
@@ -95,8 +115,7 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, "performItemClick", View.class, int.class, long.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        //XposedBridge.log("InnerUCMobile has Hooked!");
-                        XposedBridge.log("请注意，你将被劫持");
+                        XposedBridge.log("performItemClick 请注意，你将被劫持");
                         String arg = "";
                         CharSequence title = "";
                         int childCount = 0;
@@ -107,15 +126,15 @@ public class HookTest implements IXposedHookLoadPackage {
                             String t = "beforeHookedMethod!";
                             if (itemView.getParent() != null){
                                 t = t + " Parent1:" + itemView.getParent();
-                            }
-                            if (itemView.getParent().getParent() != null){
-                                t = t + " Parent2:" + itemView.getParent().getParent();
-                            }
-                            if (itemView.getParent().getParent().getParent() != null){
-                                t = t + " Parent3:" + itemView.getParent().getParent().getParent();
-                            }
-                            if (itemView.getParent().getParent().getParent().getParent() != null){
-                                t = t + " Parent4:" + itemView.getParent().getParent().getParent().getParent();
+                                if (itemView.getParent().getParent() != null){
+                                    t = t + " Parent2:" + itemView.getParent().getParent();
+                                    if (itemView.getParent().getParent().getParent() != null){
+                                        t = t + " Parent3:" + itemView.getParent().getParent().getParent();
+                                        if (itemView.getParent().getParent().getParent().getParent() != null){
+                                            t = t + " Parent4:" + itemView.getParent().getParent().getParent().getParent();
+                                        }
+                                    }
+                                }
                             }
                             XposedBridge.log(t);
                             TextView titleView = getFontSizeMaxTextView(getAllChildTextViews((ViewGroup) param.args[0]));
@@ -127,14 +146,32 @@ public class HookTest implements IXposedHookLoadPackage {
                             }
                             arg = arg + " childCount:" + childCount + ",title:" + title + ";";
                             final ListView listView = ((ListView) param.thisObject);
+                            String ts = "listView!";
+                            if (listView.getParent() != null){
+                                ts = ts + " Parent1:" + listView.getParent();
+                                if (listView.getParent().getParent() != null){
+                                    ts = ts + " Parent2:" + listView.getParent().getParent();
+                                    if (listView.getParent().getParent().getParent() != null){
+                                        ts = ts + " Parent3:" + listView.getParent().getParent().getParent();
+                                        if (listView.getParent().getParent().getParent() != null){
+                                            ts = ts + " Parent3:" + listView.getParent().getParent().getParent();
+                                        }
+                                    }
+                                }
+                            }
+                            XposedBridge.log(ts);
                             ListAdapter listAdapter = listView.getAdapter();
                             if (listAdapter != null) {
                                 int count = listAdapter.getCount();
                                 Object o = listAdapter.getItem((int) param.args[1]);
                                 Gson gson = new Gson();
                                 String json = gson.toJson(o);
-                                SharedPreferenceUtils.setParam(listView.getContext(), "json", json);
+                                sendData(listView.getContext(), XposedReceiver.ACTION_ITEM, "item", json);
                                 XposedBridge.log("beforeHookedMethod!:list count:" + count + ", item:" + o + ", json:" + json);
+                                IndexItemBean ucIndexItemBean = gson.fromJson(json, IndexItemBean.class);
+                                if (ucIndexItemBean != null) {
+                                    XposedBridge.log(ucIndexItemBean.toString());
+                                }
                             } else {
                                 XposedBridge.log("beforeHookedMethod!:listAdapter is null");
                             }
@@ -173,16 +210,20 @@ public class HookTest implements IXposedHookLoadPackage {
 
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
                         String title = (String)param.getResult();
-                        Intent intent = new Intent(XposedReceiver.ACTION_TITLE);
-                        Bundle data = new Bundle();
-                        data.putString("title", title);
-                        intent.putExtras(data);
-                        listView.getContext().sendBroadcast(intent);
+                        sendData(listView.getContext(), XposedReceiver.ACTION_TITLE, "title", title);
                         XposedBridge.log("getTitle 请注意，你将被劫持:" + title);
                     }
                 });
             }
         }
+    }
+
+    private void sendData(Context context, String action, String key, String dataStr){
+        Intent intent = new Intent(action);
+        Bundle data = new Bundle();
+        data.putString(key, dataStr);
+        intent.putExtras(data);
+        context.sendBroadcast(intent);
     }
 
     //-----------------获取 activity中的所有view
