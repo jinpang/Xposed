@@ -29,3 +29,4 @@ listView.performItemClick(listView.getAdapter().getView(click_position, null, nu
 -assumosideeffects class android.util.Log{
     public static *** d(...);
 }
+这样就是删除android.util.Log.d方法调用的那一行代码。这样apk中就没有任何日志信息了，同样的最好不要封装一层日志类，因为我们可以hook这个类通过打印参数来看信息。
