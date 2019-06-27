@@ -23,3 +23,9 @@ listView.performItemClick(listView.getChildAt(click_position), click_position, l
 listView.performItemClick(listView.getAdapter().getView(click_position, null, null),click_position,listView.getItemIdAtPosition(click_position));
 
 8、dumpsys package [packagename] 命令查看debug状态。
+
+9、在开发应用的时候如果在代码中保留日志信息是不安全的，及时用开关来控制也是不行的，需要在编出release包的时候把日志代码全部删除，这个其实很简单，在项目的混淆文件proguard-project.txt中添加一行代码即可：
+
+-assumosideeffects class android.util.Log{
+    public static *** d(...);
+}
