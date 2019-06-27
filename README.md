@@ -19,3 +19,5 @@ adb shell dumpsys activity | grep "Running activities" -A 7
 7、ListView纯粹的想用代码实现点击，listview自己有一个方法performItemClick（）；我们只需要调用这个方法就好了。
 listView.performItemClick(listView.getChildAt(click_position), click_position, listView.getItemIdAtPosition(click_position));
 listView.performItemClick(listView.getAdapter().getView(click_position, null, null),click_position,listView.getItemIdAtPosition(click_position));
+
+8、dumpsys package [packagename] 命令查看debug状态。
