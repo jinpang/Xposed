@@ -1,6 +1,7 @@
 package com.jp.allxposed;
 
 import com.jp.allxposed.hook.IqiyiHook;
+import com.jp.allxposed.hook.LocationHook;
 import com.jp.allxposed.hook.QQLiveHook;
 import com.jp.allxposed.hook.SgameHook;
 import com.jp.allxposed.hook.YoukuHook;
@@ -22,5 +23,7 @@ public class MainHook implements IXposedHookLoadPackage {
         YoukuHook.handleLoadPackage(loadPackageParam);
         //王者荣耀 开启高帧率插件
         SgameHook.handleLoadPackage(loadPackageParam);
+        //hook定位、imei
+        LocationHook.handleLoadPackage(loadPackageParam);
     }
 }

@@ -10,6 +10,14 @@ public class IqiyiHook {
 
     public static void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         if (loadPackageParam.packageName.equals(PACKAGE_NAME)) {
+            XposedHelpers.findAndHookMethod("org.qiyi.android.corejar.debug.DebugLog", loadPackageParam.classLoader, "d", String.class, String.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    super.beforeHookedMethod(param);
+                    XposedBridge.log("DebugLog:" + param.args[0] + "," + param.args[1]);
+                }
+
+            });
             XposedHelpers.findAndHookMethod("org.qiyi.android.coreplayer.b.aux", loadPackageParam.classLoader, "isLogin", new XC_MethodHook() {
                 @Override
                 protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
