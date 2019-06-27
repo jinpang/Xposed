@@ -10,7 +10,9 @@ Xposed官方git上面有几个开源项目，包括XposedInstaller、Xposed、Xp
 3、Xposed详解：https://www.infoq.cn/article/android-in-depth-xposed/
 
 4、查找Android应用当前界面所对应的activity名称
-adb shell dumpsys activity | grep "Running activities" -A 7
+adb shell dumpsys activity | grep "Running activities" -A 7   
+或者
+adb shell dumpsys activity top
 
 5、接上手机，打开 monitor ，新版的AS貌似连入口都 隐藏了，你需要到 sdk的tools目录 下找下，windows下的是 monitor.bat，接着找到对应的进程，跟踪一波方法调用。
 
