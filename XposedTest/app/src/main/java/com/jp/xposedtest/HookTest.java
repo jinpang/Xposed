@@ -4,8 +4,10 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -14,7 +16,9 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.jp.xposedtest.bean.IndexItemBean;
 import com.jp.xposedtest.touch.GestureTouchUtils;
+import com.jp.xposedtest.utils.ReflectionUtil;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +29,8 @@ import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage;
+
+import static com.jp.xposedtest.utils.ReflectionUtil.printParentViewGroup;
 
 public class HookTest implements IXposedHookLoadPackage {
     XSharedPreferences xSharedPreferences;
@@ -42,13 +48,16 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookConstructor("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, Context.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        XposedBridge.log("InfoFlowListViewEx 请注意，你将被劫持");
+                        XposedBridge.log("InfoFlowListViewEx 请注意，你将被劫持:" + param.thisObject);
+                        ReflectionUtil.printConstructors(param.thisObject.getClass(), true);
+                        ReflectionUtil.printMethods(param.thisObject.getClass(), true);
+                        ReflectionUtil.printFields(param.thisObject.getClass(), true);
                     }
 
-                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
                         if (listView == null) {
                             listView = ((ListView) param.thisObject);
-                            final int position = xSharedPreferences.getInt("index", 0);
+                            final int position = xSharedPreferences.getInt("index", 1);
                             listView.postDelayed(new Runnable() {
                                 @Override
                                 public void run() {
@@ -57,54 +66,44 @@ public class HookTest implements IXposedHookLoadPackage {
 //                            listView.performItemClick(listView.getChildAt(position), position, listView.getItemIdAtPosition(position));
                                         int count = listAdapter.getCount();
                                         if (position < count){
-                                            String t = "listView!";
-                                            if (listView.getParent() != null){
-                                                t = t + " Parent1:" + listView.getParent();
-                                                if (listView.getParent().getParent() != null){
-                                                    t = t + " Parent2:" + listView.getParent().getParent();
-                                                    if (listView.getParent().getParent().getParent() != null){
-                                                        t = t + " Parent3:" + listView.getParent().getParent().getParent();
-                                                        if (listView.getParent().getParent().getParent() != null){
-                                                            t = t + " Parent3:" + listView.getParent().getParent().getParent();
-                                                        }
-                                                    }
-                                                }
+                                            ReflectionUtil.printParentViewGroup(listView, 4);
+                                            if (listView.getContext() instanceof Activity){
+                                                XposedBridge.log("InfoFlowListViewEx 滑动");
+                                                Activity activity = (Activity)listView.getContext();
+                                                GestureTouchUtils.simulateScroll(activity.getWindow().getDecorView(), 30, 0, 30, 500);
                                             }
-                                            XposedBridge.log(t);
-                                            //listView.smoothScrollToPosition(position);
-                                            //listView.scrollListBy(500);
-                                            //listView.smoothScrollToPositionFromTop(position, 0, 300);
-                                            GestureTouchUtils.simulateScroll(listView, 30, 0, 30, 500);
                                             listView.postDelayed(new Runnable() {
                                                 @Override
                                                 public void run() {
-                                                    //listView.setSelection(position);
                                                     listView.performItemClick(listView.getChildAt(position), position, listView.getItemIdAtPosition(position));
                                                 }
                                             }, 2000 + 50);
                                             Object o = listAdapter.getItem(position);
                                             Gson gson = new Gson();
                                             String json = gson.toJson(o);
+                                            XposedBridge.log("InfoFlowListViewEx list count:" + count + ", item:" + o + ", json:" + json + ", position:" + position);
                                             sendData(listView.getContext(), XposedReceiver.ACTION_ITEM, "item", json);
-                                            XposedBridge.log("list count:" + count + ", item:" + o + ", json:" + json);
-                                            StringBuffer buffer = new StringBuffer("titles:");
                                             for (int i=0; i<count; i++){
                                                 Object o2 = listAdapter.getItem(i);
+                                                String str = "";
                                                 if (o2 != null) {
                                                     String os = gson.toJson(o2);
-                                                    XposedBridge.log(os);
+                                                    //XposedBridge.log(os);
                                                     IndexItemBean ucIndexItemBean = gson.fromJson(os, IndexItemBean.class);
                                                     if (ucIndexItemBean != null) {
-                                                        buffer.append(ucIndexItemBean.toString()).append("\n");
+                                                        str = ucIndexItemBean.toString();
+                                                    }else {
+                                                        str = "" + os;
                                                     }
                                                 }
+                                                XposedBridge.log("InfoFlowListViewEx: position:" + i + ", " + str);
                                             }
                                         }else {
                                             listView.smoothScrollToPosition(count);
-                                            XposedBridge.log("list count:" + count + ", position:" + position);
+                                            XposedBridge.log("InfoFlowListViewEx list count2:" + count + ", position:" + position);
                                         }
                                     } else {
-                                        XposedBridge.log("listAdapter is null");
+                                        XposedBridge.log("InfoFlowListViewEx listAdapter is null");
                                     }
                                 }
                             }, 15000);
@@ -115,76 +114,142 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, "performItemClick", View.class, int.class, long.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        XposedBridge.log("performItemClick 请注意，你将被劫持");
+                        XposedBridge.log("beforeHookedMethod performItemClick 请注意，你将被劫持:" + param.args);
+                        ReflectionUtil.printConstructors(param.thisObject.getClass(), true);
+                        ReflectionUtil.printMethods(param.thisObject.getClass(), true);
+                        ReflectionUtil.printFields(param.thisObject.getClass(), true);
+                        ReflectionUtil.printConstructors(param.args[0].getClass(), true);
+                        ReflectionUtil.printMethods(param.args[0].getClass(), true);
+                        ReflectionUtil.printFields(param.args[0].getClass(), true);
                         String arg = "";
                         CharSequence title = "";
-                        int childCount = 0;
-                        if (param.args != null) {
-                            final int position = (int) param.args[1];
-                            final long id = (long) param.args[2];
-                            ViewGroup itemView = (ViewGroup) param.args[0];
-                            String t = "beforeHookedMethod!";
-                            if (itemView.getParent() != null){
-                                t = t + " Parent1:" + itemView.getParent();
-                                if (itemView.getParent().getParent() != null){
-                                    t = t + " Parent2:" + itemView.getParent().getParent();
-                                    if (itemView.getParent().getParent().getParent() != null){
-                                        t = t + " Parent3:" + itemView.getParent().getParent().getParent();
-                                        if (itemView.getParent().getParent().getParent().getParent() != null){
-                                            t = t + " Parent4:" + itemView.getParent().getParent().getParent().getParent();
-                                        }
+                        final int position = (int) param.args[1];
+                        ViewGroup itemView = (ViewGroup) param.args[0];
+                        printParentViewGroup(itemView, 4);
+                        final ListView listView = ((ListView) param.thisObject);
+                        printParentViewGroup(listView, 4);
+                        ListAdapter listAdapter = listView.getAdapter();
+                        if (listAdapter != null) {
+                            int count = listAdapter.getCount();
+                            Object o = listAdapter.getItem(position);
+                            if (o != null){
+                                Method method = o.getClass().getMethod("getTitle", new Class<?>[]{});
+                                title = (String)method.invoke(o, new Object[]{});
+                                XposedBridge.log("beforeHookedMethod!:title2:" + title);
+                            }
+                            Gson gson = new Gson();
+                            String json = gson.toJson(o);
+                            sendData(listView.getContext(), XposedReceiver.ACTION_ITEM, "item", json);
+                            XposedBridge.log("beforeHookedMethod!:list count:" + count + ", item:" + o + ", json:" + json);
+                            IndexItemBean ucIndexItemBean = gson.fromJson(json, IndexItemBean.class);
+                            if (ucIndexItemBean != null) {
+                                XposedBridge.log(ucIndexItemBean.toString());
+                                XposedBridge.log("beforeHookedMethod!:+++++++++++++++++++");
+                            }
+                            for (int i=0; i<count; i++){
+                                Object o2 = listAdapter.getItem(i);
+                                String str = "";
+                                if (o2 != null) {
+                                    String os = gson.toJson(o2);
+                                    ucIndexItemBean = gson.fromJson(os, IndexItemBean.class);
+                                    if (ucIndexItemBean != null) {
+                                        str = ucIndexItemBean.toString();
+                                    }else {
+                                        str = "" + os;
                                     }
                                 }
+                                XposedBridge.log("InfoFlowListViewEx: position:" + i + ", " + str);
                             }
-                            XposedBridge.log(t);
-                            TextView titleView = getFontSizeMaxTextView(getAllChildTextViews((ViewGroup) param.args[0]));
-                            if (titleView != null) {
-                                title = titleView.getText();
-                            }
-                            for (Object o : param.args) {
-                                arg = arg + o + "," + o.getClass().getName() + ", ";
-                            }
-                            arg = arg + " childCount:" + childCount + ",title:" + title + ";";
-                            final ListView listView = ((ListView) param.thisObject);
-                            String ts = "listView!";
-                            if (listView.getParent() != null){
-                                ts = ts + " Parent1:" + listView.getParent();
-                                if (listView.getParent().getParent() != null){
-                                    ts = ts + " Parent2:" + listView.getParent().getParent();
-                                    if (listView.getParent().getParent().getParent() != null){
-                                        ts = ts + " Parent3:" + listView.getParent().getParent().getParent();
-                                        if (listView.getParent().getParent().getParent() != null){
-                                            ts = ts + " Parent3:" + listView.getParent().getParent().getParent();
-                                        }
-                                    }
-                                }
-                            }
-                            XposedBridge.log(ts);
-                            ListAdapter listAdapter = listView.getAdapter();
-                            if (listAdapter != null) {
-                                int count = listAdapter.getCount();
-                                Object o = listAdapter.getItem((int) param.args[1]);
-                                Gson gson = new Gson();
-                                String json = gson.toJson(o);
-                                sendData(listView.getContext(), XposedReceiver.ACTION_ITEM, "item", json);
-                                XposedBridge.log("beforeHookedMethod!:list count:" + count + ", item:" + o + ", json:" + json);
-                                IndexItemBean ucIndexItemBean = gson.fromJson(json, IndexItemBean.class);
-                                if (ucIndexItemBean != null) {
-                                    XposedBridge.log(ucIndexItemBean.toString());
-                                }
-                            } else {
-                                XposedBridge.log("beforeHookedMethod!:listAdapter is null");
-                            }
+                        } else {
+                            XposedBridge.log("beforeHookedMethod!:listAdapter is null");
+                        }
+                        for (Object o : param.args) {
+                            arg = arg + o + "," + o.getClass().getName() + ", ";
                         }
                         XposedBridge.log("beforeHookedMethod!:" + arg);
-                        Toast.makeText(((ListView) param.thisObject).getContext(), "请注意，已劫持《" + title + "》", Toast.LENGTH_LONG).show();
+                        Toast.makeText(((ListView) param.thisObject).getContext(), "请注意，第" + position + "条已劫持《" + title + "》", Toast.LENGTH_LONG).show();
                     }
 
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                        XposedBridge.log("performItemClick 请注意，你已被劫持");
+                        XposedBridge.log("afterHookedMethod performItemClick 请注意，你已被劫持");
                     }
                 });
 
+                /*XposedHelpers.findAndHookMethod("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, "onTouchEvent", MotionEvent.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("beforeHookedMethod onTouchEvent 请注意，你将被劫持:" + param.args);
+                        ReflectionUtil.printConstructors(param.thisObject.getClass(), true);
+                        ReflectionUtil.printMethods(param.thisObject.getClass(), true);
+                        ReflectionUtil.printFields(param.thisObject.getClass(), true);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        XposedBridge.log("afterHookedMethod onTouchEvent 请注意，你已被劫持");
+                    }
+                });*/
+
+                /*XposedHelpers.findAndHookMethod("com.uc.application.infoflow.widget.listwidget.e", loadPackageParam.classLoader, "setAdapter", ListAdapter.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("beforeHookedMethod setAdapter 请注意，你将被劫持:" + param.args[0]);
+                        ReflectionUtil.printConstructors(param.thisObject.getClass(), true);
+                        ReflectionUtil.printMethods(param.thisObject.getClass(), true);
+                        ReflectionUtil.printFields(param.thisObject.getClass(), true);
+                        ReflectionUtil.printConstructors(param.args[0].getClass(), true);
+                        ReflectionUtil.printMethods(param.args[0].getClass(), true);
+                        ReflectionUtil.printFields(param.args[0].getClass(), true);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        XposedBridge.log("afterHookedMethod setAdapter 请注意，你已被劫持");
+                    }
+                });*/
+                /*XposedHelpers.findAndHookMethod("com.uc.sdk.ulog.LogInternal", loadPackageParam.classLoader, "i", String.class, String.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("LogInternal i:" + param.args[0] + ", " + param.args[1]);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    }
+                });
+                XposedHelpers.findAndHookMethod("com.uc.sdk.ulog.LogInternal", loadPackageParam.classLoader, "e", String.class, String.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("LogInternal e:" + param.args[0] + ", " + param.args[1]);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    }
+                });
+                XposedHelpers.findAndHookMethod("com.uc.sdk.ulog.LogInternal", loadPackageParam.classLoader, "w", String.class, String.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("LogInternal w:" + param.args[0] + ", " + param.args[1]);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    }
+                });
+                XposedHelpers.findAndHookMethod("com.uc.sdk.ulog.LogInternal", loadPackageParam.classLoader, "d", String.class, String.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("LogInternal d:" + param.args[0] + ", " + param.args[1]);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    }
+                });
+                XposedHelpers.findAndHookMethod("com.uc.sdk.ulog.LogInternal", loadPackageParam.classLoader, "f", String.class, String.class, new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                        XposedBridge.log("LogInternal f:" + param.args[0] + ", " + param.args[1]);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    }
+                });*/
                 XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView", loadPackageParam.classLoader, "loadUrl", String.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
@@ -215,6 +280,7 @@ public class HookTest implements IXposedHookLoadPackage {
                     }
                 });
             }
+            LinearLayout linearLayout;
         }
     }
 

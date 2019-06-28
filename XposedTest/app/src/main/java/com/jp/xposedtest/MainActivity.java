@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
         });
         boolean isOpen = (boolean) SharedPreferenceUtils.getParam(this, "is_open", Boolean.TRUE);
         swOpen.setChecked(isOpen);
-        index = (int) SharedPreferenceUtils.getParam(this, "index", 0);
+        index = (int) SharedPreferenceUtils.getParam(this, "index", 1);
         etInput.setText(index + "");
         etInput.addTextChangedListener(new TextWatcher() {
             @Override

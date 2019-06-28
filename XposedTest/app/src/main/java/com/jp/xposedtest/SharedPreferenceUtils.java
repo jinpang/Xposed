@@ -2,6 +2,7 @@ package com.jp.xposedtest;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 
 /**
  * 用户账户信息保存工具类
@@ -21,7 +22,9 @@ public class SharedPreferenceUtils {
      * @param object
      */
     public static void setParam(Context context, String key, Object object) {
-
+        if (context == null || TextUtils.isEmpty(key) || object == null){
+            return;
+        }
         String type = object.getClass().getSimpleName();
         SharedPreferences sp = context.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -49,6 +52,9 @@ public class SharedPreferenceUtils {
      * @return
      */
     public static Object getParam(Context context, String key, Object defaultObject) {
+        if (context == null || TextUtils.isEmpty(key) || defaultObject == null){
+            return defaultObject;
+        }
         String type = defaultObject.getClass().getSimpleName();
         SharedPreferences sp = context.getSharedPreferences(FILE_NAME, Context.MODE_PRIVATE);
 
@@ -72,7 +78,10 @@ public class SharedPreferenceUtils {
      *
      * @param context
      */
-    public static void clear(Context context) {
+    public static void clearAll(Context context) {
+        if (context == null){
+            return;
+        }
         SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
@@ -84,11 +93,14 @@ public class SharedPreferenceUtils {
      *
      * @param context
      */
-    public static void clearAll(Context context) {
+    public static void clear(Context context, String key) {
+        if (context == null || TextUtils.isEmpty(key)){
+            return;
+        }
         SharedPreferences sp = context.getSharedPreferences(FILE_NAME,
                 Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
-        editor.remove("定义的键名");
+        editor.remove(key);
         editor.commit();
     }
 
