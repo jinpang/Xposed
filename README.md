@@ -32,3 +32,6 @@ listView.performItemClick(listView.getAdapter().getView(click_position, null, nu
 这样就是删除android.util.Log.d方法调用的那一行代码。这样apk中就没有任何日志信息了，同样的最好不要封装一层日志类，因为我们可以hook这个类通过打印参数来看信息。或者在开发应用的时候，就是用系统日志类，然后代码在混淆的时候删除即可，或者封装了一层之后，也要把这个类添加混淆让apk包中看不到这个日志类代码即可，
 
 10、 对于一些比较大的apk，直接使用jadx反编译的话，很容易直接卡死，可以参考下：jinpang/CPWechatXposed。
+
+11、使用Android studio开发Moudle时，记得把Hot Reload关掉：File->Settings->Build,Execution,Deployment->Instant Run->不勾选Enable Instant Run to hot swap code/resource changes on deploy(default enabled)
+
