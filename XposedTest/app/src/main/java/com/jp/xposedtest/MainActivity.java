@@ -90,6 +90,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String toastMessage() {
-        return "我未被劫持";
+        return swOpen.isChecked() ? "UC已被劫持" : "UC未被劫持";
     }
 }

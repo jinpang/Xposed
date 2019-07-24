@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.jp.xposedtest">
-
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,6 +22,8 @@
             <intent-filter>
                 <action android:name="com.jp.xposedtest.ACTION_TITLE" />
                 <action android:name="com.jp.xposedtest.ACTION_ITEM" />
+                <action android:name="com.jp.xposedtest.ACTION_SEARCH_OK" />
+                <action android:name="com.jp.xposedtest.ACTION_SEARCH_FAILED" />
             </intent-filter>
         </receiver>
         <meta-data
@@ -33,7 +36,7 @@
 
         <meta-data
             android:name="xposedminversion"
-            android:value="53" />
+            android:value="54" />
     </application>
 
 </manifest>
