@@ -53,20 +53,40 @@ public class JSoupUtil {
 
     public static void parseUrl(final Context context, final String url){
         XposedBridge.log("parseUrl:" + url);
-        if (URLUtil.isHttpUrl(url) || URLUtil.isHttpsUrl(url)){
-            XposedBridge.log("parseUrl in:" + url);
+        if (!TextUtils.isEmpty(url)){
+            String tmpUrl = url;
+            String prefixHttp = "http://";
+            String prefixHttps = "https://";
+            if (url.contains(prefixHttp) || url.contains(prefixHttps)) {
+                if (url.contains(prefixHttp)) {
+                    tmpUrl = url.substring(url.indexOf(prefixHttp));
+                }else if (url.contains(prefixHttps)) {
+                    tmpUrl = url.substring(url.indexOf(prefixHttps));
+                }
+            }
+            final String url2 = tmpUrl;
+            if (URLUtil.isHttpUrl(url2) || URLUtil.isHttpsUrl(url2)){
+                XposedBridge.log("parseUrl in:" + url);
 //            Gson gson = new Gson();
-            new Thread(
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                Uri uri = Uri.parse(url);
-                                String type = uri.getQueryParameter("q");
-                                Document doc = Jsoup.connect(url).get();
-                                XposedBridge.log("parseUrl title:" + type + "=" + doc.title());
-                                writeTxtToFile(context, doc.html(), Environment.getExternalStorageDirectory().getAbsolutePath(), type + ".txt");
-                                //搜索页进来的
+                new Thread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Uri uri = Uri.parse(url2);
+                                    String type = uri.getQueryParameter("q");
+                                    Document doc = Jsoup.connect(url2).get();
+                                    String title = doc.title();
+                                    XposedBridge.log("parseUrl title:" + type + "=" + title);
+                                    String name = type;
+                                    if (TextUtils.isEmpty(name)){
+                                        name = title;
+                                    }
+                                    if (TextUtils.isEmpty(name)){
+                                        name = "uc";
+                                    }
+                                    writeTxtToFile(context, doc.html(), Environment.getExternalStorageDirectory().getAbsolutePath(), name + ".txt");
+                                    //搜索页进来的
                                 /*ArrayList<String> texts = new ArrayList<>();
                                 if (!TextUtils.isEmpty(type)){
                                     Elements eles = doc.select("a");
@@ -84,12 +104,13 @@ public class JSoupUtil {
                                     }
                                     writeTxtToFile(context, texts, Environment.getExternalStorageDirectory().getAbsolutePath(), type + ".txt");
                                 }*/
-                            } catch (Exception e) {
-                                e.printStackTrace();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
-                    }
-            ).start();
+                ).start();
+            }
         }
     }
 
@@ -129,7 +150,7 @@ public class JSoupUtil {
     private static void writeTxtToFile(Context context, String strcontent, String filePath, String fileName) {
         //生成文件夹之后，再生成文件，不然会出错
         makeFilePath(filePath, fileName);
-        String strFilePath = filePath + "/" + fileName;
+        String strFilePath = filePath + "/" + "123.txt";
         // 每次写入时，都换行写
         String strContent = strcontent + "\r\n";
         try {
