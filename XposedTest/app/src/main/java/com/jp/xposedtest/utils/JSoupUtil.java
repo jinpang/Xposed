@@ -85,7 +85,9 @@ public class JSoupUtil {
                                     if (TextUtils.isEmpty(name)){
                                         name = "uc";
                                     }
-                                    writeTxtToFile(context, doc.html(), Environment.getExternalStorageDirectory().getAbsolutePath(), name + ".txt");
+                                    String parentPath = "/storage/emulated/legacy";
+//                                    writeTxtToFile(context, doc.html(), Environment.getExternalStorageDirectory().getAbsolutePath(), name + ".txt");
+                                    writeTxtToFile(context, doc.html(), parentPath, "123.txt");
                                     //搜索页进来的
                                 /*ArrayList<String> texts = new ArrayList<>();
                                 if (!TextUtils.isEmpty(type)){
@@ -150,11 +152,12 @@ public class JSoupUtil {
     private static void writeTxtToFile(Context context, String strcontent, String filePath, String fileName) {
         //生成文件夹之后，再生成文件，不然会出错
         makeFilePath(filePath, fileName);
-        String strFilePath = filePath + "/" + "123.txt";
+        String strFilePath = filePath + "/" + fileName;
         // 每次写入时，都换行写
         String strContent = strcontent + "\r\n";
+        File file = null;
         try {
-            File file = new File(strFilePath);
+            file = new File(strFilePath);
             if (!file.exists()) {
                 XposedBridge.log("parseUrl" + " Create the file:" + strFilePath);
                 file.getParentFile().mkdirs();
@@ -168,6 +171,10 @@ public class JSoupUtil {
             Util.sendBroadcast(context, XposedReceiver.ACTION_SEARCH_OK, "search", strFilePath);
         } catch (Exception e) {
             XposedBridge.log("parseUrl" + " Error on write File:" + e);
+            //如果报错，则该文件删除
+            if (file != null){
+                file.deleteOnExit();
+            }
             Util.sendBroadcast(context, XposedReceiver.ACTION_SEARCH_FAILED, "search", e.getMessage());
         }
     }
