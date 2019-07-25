@@ -30,20 +30,24 @@ public class Util {
     }
 
     public static void printTreeView(View rootView) {
-        if (rootView instanceof ViewGroup) {
-            ViewGroup parentView = (ViewGroup) rootView;
-            for (int i = 0; i < parentView.getChildCount(); i++) {
-                printTreeView(parentView.getChildAt(i));
+        try {
+            if (rootView instanceof ViewGroup) {
+                ViewGroup parentView = (ViewGroup) rootView;
+                for (int i = 0; i < parentView.getChildCount(); i++) {
+                    printTreeView(parentView.getChildAt(i));
+                }
+            } else {
+                Log.d(TAG, "view: " + rootView.getId() + ", class: " + rootView.getClass());
+                // any view if you want something different
+                if (rootView instanceof EditText) {
+                    Log.d(TAG, "edit:" + rootView.getTag()
+                            + "， hint: " + ((EditText) rootView).getHint());
+                } else if (rootView instanceof TextView) {
+                    Log.d(TAG, "text:" + ((TextView) rootView).getText().toString());
+                }
             }
-        } else {
-            Log.d(TAG, "view: " + rootView.getId() + ", class: " + rootView.getClass());
-            // any view if you want something different
-            if (rootView instanceof EditText) {
-                Log.d(TAG, "edit:" + rootView.getTag()
-                        + "， hint: " + ((EditText) rootView).getHint());
-            } else if (rootView instanceof TextView) {
-                Log.d(TAG, "text:" + ((TextView) rootView).getText().toString());
-            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

@@ -2,20 +2,14 @@ package com.jp.xposedtest;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.Message;
-import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.jp.xposedtest.bean.IndexItemBean;
 import com.jp.xposedtest.utils.JSoupUtil;
+import com.jp.xposedtest.utils.PropertyUtil;
 import com.jp.xposedtest.utils.Util;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -39,13 +33,12 @@ public class HookTest implements IXposedHookLoadPackage {
             if (xSharedPreferences == null) {
                 xSharedPreferences = new XSharedPreferences(BuildConfig.APPLICATION_ID, SharedPreferenceUtils.FILE_NAME);
             }
-            TextView view;
-            //boolean isOpen = xSharedPreferences.getBoolean("is_open", true);
-            if (true) {
+            boolean isOpen = Boolean.valueOf(PropertyUtil.readValue(MainActivity.CONFIG_PATH, "is_open", "true"));
+            if (isOpen) {
                 //com.uc.browser.InnerUCMobile
                 Class clazz = XposedHelpers.findClassIfExists("com.uc.browser.InnerUCMobile", loadPackageParam.classLoader);
                 if (clazz != null) {
-                    XposedBridge.log("InnerUCMobile:"  +clazz.getName());
+                    XposedBridge.log("InnerUCMobile:" + clazz.getName());
                     XposedHelpers.findAndHookMethod(clazz, "onAttachedToWindow", new XC_MethodHook() {
                         protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                             super.beforeHookedMethod(param);
@@ -58,7 +51,7 @@ public class HookTest implements IXposedHookLoadPackage {
                             super.afterHookedMethod(param);
                         }
                     });
-                }else {
+                } else {
                     XposedBridge.log("com.uc.application.infoflow.widget.o.c not found");
                 }
                 /*XposedHelpers.findAndHookConstructor("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, Context.class, new XC_MethodHook() {
@@ -167,8 +160,9 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView", loadPackageParam.classLoader, "loadUrl", String.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        XposedBridge.log("WebView 请注意，你将被劫持:" + param.args[0]);
-                        JSoupUtil.parseUrl(((FrameLayout)param.thisObject).getContext(), (String)param.args[0]);
+                        String parentPath = PropertyUtil.readValue(MainActivity.CONFIG_PATH, "path", "获取不到路径");
+                        XposedBridge.log("WebView 请注意，你将被劫持:保存路径" + parentPath + ":" + param.args[0]);
+                        JSoupUtil.parseUrl(((FrameLayout) param.thisObject).getContext(), (String) param.args[0]);
                     }
 
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -177,8 +171,9 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView", loadPackageParam.classLoader, "loadUrl", String.class, Map.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        XposedBridge.log("WebViewMap 请注意，你将被劫持:" + param.args[0] + ", Map:" + param.args[1]);
-                        JSoupUtil.parseUrl(((FrameLayout)param.thisObject).getContext(), (String)param.args[0]);
+                        String parentPath = (String) xSharedPreferences.getString("path", "获取不到路径");
+                        XposedBridge.log("WebViewMap 请注意，你将被劫持:保存路径" + parentPath + ":" + param.args[0] + ", Map:" + param.args[1]);
+                        JSoupUtil.parseUrl(((FrameLayout) param.thisObject).getContext(), (String) param.args[0]);
                     }
 
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
@@ -195,7 +190,7 @@ public class HookTest implements IXposedHookLoadPackage {
                         /*if (!TextUtils.isEmpty(title) && !title.startsWith("http")){
                             Toast.makeText(((ListView) param.thisObject).getContext(), "已获取到《" + title + "》详情页的标题", Toast.LENGTH_LONG).show();
                         }*/
-                        sendBroadcast(((FrameLayout)param.thisObject).getContext(), XposedReceiver.ACTION_TITLE, "title", title);
+                        sendBroadcast(((FrameLayout) param.thisObject).getContext(), XposedReceiver.ACTION_TITLE, "title", title);
                         XposedBridge.log("getTitle 请注意，你将被劫持:" + title);
                     }
                 });
