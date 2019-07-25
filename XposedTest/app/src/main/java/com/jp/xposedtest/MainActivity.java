@@ -28,6 +28,8 @@ public class MainActivity extends AppCompatActivity {
     String index;
     String title, item, path;
     ClipboardManager myClipboard;
+    String systemPath;
+
     public final static String CONFIG_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/auc/config.properties";
 
     @Override
@@ -42,8 +44,17 @@ public class MainActivity extends AppCompatActivity {
         tvResult = findViewById(R.id.content);
         swOpen = findViewById(R.id.sw_open);
         tvSystemPath = findViewById(R.id.tv_system_path);
-        String systemPath = Environment.getExternalStorageDirectory().getAbsolutePath();
-        tvSystemPath.setText("系统外部存储路径：" + systemPath);
+        systemPath = Environment.getExternalStorageDirectory().getAbsolutePath();
+        tvSystemPath.setText("建议保存在外部存储路径下，点击复制路径：\n" + systemPath);
+        tvSystemPath.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ClipData myClip;
+                myClip = ClipData.newPlainText("text", systemPath);
+                myClipboard.setPrimaryClip(myClip);
+                Toast.makeText(view.getContext(), "已复制:" + systemPath, Toast.LENGTH_LONG).show();
+            }
+        });
         path = PropertyUtil.readValue(CONFIG_PATH, "path", "/storage/emulated/legacy");
         //path = (String) SharedPreferenceUtils.getParam(this, "path", "/storage/emulated/legacy");
         etStorage.setText(path);
