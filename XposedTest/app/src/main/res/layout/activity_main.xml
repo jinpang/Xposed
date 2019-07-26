@@ -21,13 +21,43 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <Button
-            android:id="@+id/button"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="检查是否被劫持"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/sw_open" />
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="是否被劫持"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sw_open" />
+
+            <Button
+                android:id="@+id/btn_write123"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="写入123"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sw_open" />
+
+            <Button
+                android:id="@+id/btn_refresh_file"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="刷新文件"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sw_open" />
+
+            <Button
+                android:id="@+id/btn_refresh_and_copy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="刷新并复制"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/sw_open" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/ed_index"
@@ -67,15 +97,17 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ed_storage" />
+
         <TextView
             android:id="@+id/tv_content_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/the_end"
-            android:textColor="@android:color/holo_red_dark"
             android:text="\n文件内容如下：\n"
+            android:textColor="@android:color/holo_red_dark"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
+
         <TextView
             android:id="@+id/content"
             android:layout_width="wrap_content"

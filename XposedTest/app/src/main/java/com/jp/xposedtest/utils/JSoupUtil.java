@@ -11,9 +11,12 @@ import com.jp.xposedtest.XposedReceiver;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 
 import de.robv.android.xposed.XposedBridge;
@@ -152,11 +155,13 @@ public class JSoupUtil {
         }
     }
 
-    private static void saveAsFileWriter(String content, String savefile) {
+    public static boolean saveAsFileWriter(String content, String savefile) {
         FileWriter fwriter = null;
+        boolean isSuccess = false;
         try {
             fwriter = new FileWriter(savefile);
             fwriter.write(content);
+            isSuccess = true;
         } catch (IOException ex) {
             ex.printStackTrace();
         } finally {
@@ -167,6 +172,33 @@ public class JSoupUtil {
                 ex.printStackTrace();
             }
         }
+        return isSuccess;
+    }
+
+    public static String readFile(String filePath) {
+        BufferedReader br = null;
+        StringBuffer buffer = new StringBuffer();
+        try {
+            br = new BufferedReader(new InputStreamReader(new FileInputStream(filePath)));
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                //System.out.println(line);
+                buffer.append(line);
+                buffer.append("\n");
+            }
+            br.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                br = null;
+            }
+        }
+        return buffer.toString();
     }
 
     //生成文件

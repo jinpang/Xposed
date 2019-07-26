@@ -20,16 +20,20 @@ public class XposedReceiver extends BroadcastReceiver {
         Log.e(TAG, "action:" + action);
         if (ACTION_TITLE.equals(action)){
             String title = bundle.getString("title", "");
-            SharedPreferenceUtils.setParam(context, "title", title);
+            Log.e(TAG, "title:" + title);
+            //SharedPreferenceUtils.setParam(context, "title", title);
         }else if (ACTION_ITEM.equals(action)){
             String item = bundle.getString("item", "");
-            SharedPreferenceUtils.setParam(context, "item", item);
+            Log.e(TAG, "item:" + item);
+            //SharedPreferenceUtils.setParam(context, "item", item);
         }else if (ACTION_SEARCH_OK.equals(action)){
             String item = bundle.getString("search", "");
-            Toast.makeText(context, "保存成功，路径：" + item, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "保存成功，路径:" + item);
+            Toast.makeText(context, "保存成功，路径：" + item, Toast.LENGTH_SHORT).show();
         }else if (ACTION_SEARCH_FAILED.equals(action)){
             String item = bundle.getString("search", "");
-            Toast.makeText(context, "保存失败，原因：" + item, Toast.LENGTH_LONG).show();
+            Log.e(TAG, "保存失败，原因:" + item);
+            Toast.makeText(context, "保存失败，原因：" + item, Toast.LENGTH_SHORT).show();
         }
     }
 }

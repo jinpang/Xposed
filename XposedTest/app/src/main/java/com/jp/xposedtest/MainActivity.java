@@ -5,7 +5,6 @@ import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
-import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.jp.xposedtest.utils.JSoupUtil;
 import com.jp.xposedtest.utils.PropertyUtil;
 
 import java.io.BufferedReader;
@@ -24,7 +24,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class MainActivity extends AppCompatActivity {
+import static com.jp.xposedtest.utils.JSoupUtil.readFile;
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button button;
     private Switch swOpen;
@@ -35,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
     String title, item, path;
     ClipboardManager myClipboard;
     String systemPath;
-
+    String fileName = "123.txt";
     public final static String CONFIG_PATH = Environment.getExternalStorageDirectory().getAbsolutePath() + "/auc/config.properties";
 
     @Override
@@ -45,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
         myClipboard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
 
         button = (Button) findViewById(R.id.button);
+        findViewById(R.id.btn_write123).setOnClickListener(this);
+        findViewById(R.id.btn_refresh_file).setOnClickListener(this);
+        findViewById(R.id.btn_refresh_and_copy).setOnClickListener(this);
         etInput = findViewById(R.id.ed_index);
         etStorage = findViewById(R.id.ed_storage);
         tvResult = findViewById(R.id.content);
@@ -131,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(view.getContext(), "已复制", Toast.LENGTH_LONG).show();
             }
         });
-        tvResult.setText(readF1(etStorage.getText().toString() + "/123.txt"));
+        tvResult.setText(readFile(getFilePath()));
     }
 
     private String getSwitchStr() {
@@ -142,30 +147,33 @@ public class MainActivity extends AppCompatActivity {
         return swOpen.isChecked() ? "UC已被劫持" : "UC未被劫持";
     }
 
-
-    public static String readF1(String filePath) {
-        BufferedReader br = null;
-        StringBuffer buffer = new StringBuffer();
-        try {
-            br = new BufferedReader(new InputStreamReader( new FileInputStream(filePath)));
-            for (String line = br.readLine(); line != null; line = br.readLine()) {
-                //System.out.println(line);
-                buffer.append(line);
-                buffer.append("\n");
-            }
-            br.close();
-        }catch (Exception e){
-            e.printStackTrace();
-        } finally {
-            if (br != null){
-                try {
-                    br.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                br = null;
-            }
+    public String getFilePath(){
+        String filePath = etStorage.getText().toString();
+        String strFilePath = fileName;
+        if (filePath.endsWith("/")) {
+            strFilePath = filePath + fileName;
+        } else {
+            strFilePath = filePath + "/" + fileName;
         }
-        return buffer.toString();
+        return strFilePath;
+    }
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        if (id == R.id.btn_write123) {
+            boolean success = JSoupUtil.saveAsFileWriter("123", getFilePath());
+            String str = success ? "成功" : "失败";
+            Toast.makeText(this, str +"写入‘123’到123.txt文件中", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.btn_refresh_file) {
+            tvResult.setText(readFile(getFilePath()));
+            Toast.makeText(this, "成功刷新123.txt文件", Toast.LENGTH_SHORT).show();
+        } else if (id == R.id.btn_refresh_and_copy) {
+            tvResult.setText(readFile(getFilePath()));
+            ClipData myClip;
+            myClip = ClipData.newPlainText("text", tvResult.getText());
+            myClipboard.setPrimaryClip(myClip);
+            Toast.makeText(this, "刷新并复制成功", Toast.LENGTH_SHORT).show();
+        }
     }
 }

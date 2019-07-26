@@ -2,10 +2,13 @@ package com.jp.xposedtest;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Message;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.jp.xposedtest.utils.JSoupUtil;
 import com.jp.xposedtest.utils.PropertyUtil;
 import com.jp.xposedtest.utils.Util;
@@ -23,6 +26,7 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage;
 public class HookTest implements IXposedHookLoadPackage {
     XSharedPreferences xSharedPreferences;
     ListView listView;
+    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
 
     public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable {
         XposedBridge.log(" packageName:" + loadPackageParam.packageName);
@@ -57,7 +61,7 @@ public class HookTest implements IXposedHookLoadPackage {
                 /*XposedHelpers.findAndHookConstructor("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, Context.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        XposedBridge.log("InfoFlowListViewEx 请注意，你将被劫持:" + param.thisObject);
+                        XposedBridge.log("InfoFlowListViewEx 将劫持:" + param.thisObject);
                     }
 
                     protected void afterHookedMethod(final MethodHookParam param) throws Throwable {
@@ -106,7 +110,7 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.framework.ui.widget.ListViewEx", loadPackageParam.classLoader, "performItemClick", View.class, int.class, long.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        XposedBridge.log("beforeHookedMethod performItemClick 请注意，你将被劫持:" + param.args);
+                        XposedBridge.log("beforeHookedMethod performItemClick 将劫持:" + param.args);
                         String arg = "";
                         CharSequence title = "";
                         final int position = (int) param.args[1];
@@ -160,8 +164,8 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView", loadPackageParam.classLoader, "loadUrl", String.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        String parentPath = PropertyUtil.readValue(MainActivity.CONFIG_PATH, "path", "获取不到路径");
-                        XposedBridge.log("WebView 请注意，你将被劫持:保存路径" + parentPath + ":" + param.args[0]);
+                        //String parentPath = PropertyUtil.readValue(MainActivity.CONFIG_PATH, "path", "获取不到路径");
+                        XposedBridge.log("WebView 将劫持:" +  param.args[0] + ":" + gson.toJson(param.args));
                         JSoupUtil.parseUrl(((FrameLayout) param.thisObject).getContext(), (String) param.args[0]);
                     }
 
@@ -171,8 +175,8 @@ public class HookTest implements IXposedHookLoadPackage {
                 XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView", loadPackageParam.classLoader, "loadUrl", String.class, Map.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
-                        String parentPath = (String) xSharedPreferences.getString("path", "获取不到路径");
-                        XposedBridge.log("WebViewMap 请注意，你将被劫持:保存路径" + parentPath + ":" + param.args[0] + ", Map:" + param.args[1]);
+                        //String parentPath = (String) xSharedPreferences.getString("path", "获取不到路径");
+                        XposedBridge.log("WebViewMap 将劫持:保存路径" + param.args[0] + ", Map:" + param.args[1] + ":" + gson.toJson(param.args));
                         JSoupUtil.parseUrl(((FrameLayout) param.thisObject).getContext(), (String) param.args[0]);
                     }
 
@@ -191,10 +195,27 @@ public class HookTest implements IXposedHookLoadPackage {
                             Toast.makeText(((ListView) param.thisObject).getContext(), "已获取到《" + title + "》详情页的标题", Toast.LENGTH_LONG).show();
                         }*/
                         sendBroadcast(((FrameLayout) param.thisObject).getContext(), XposedReceiver.ACTION_TITLE, "title", title);
-                        XposedBridge.log("getTitle 请注意，你将被劫持:" + title);
+                        XposedBridge.log("getTitle 将劫持:" + title);
                     }
                 });
+                XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView$b", loadPackageParam.classLoader, "onPageStarted", new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                    }
 
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        XposedBridge.log("onPageStarted:" + param.args[0] + ":" + param.args[1] + ":" + param.args[2]);
+                    }
+                });
+                XposedHelpers.findAndHookMethod("com.uc.webview.export.WebView$b", loadPackageParam.classLoader, "onPageFinished", new XC_MethodHook() {
+                    protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                        super.beforeHookedMethod(param);
+                    }
+
+                    protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                        XposedBridge.log("onPageFinished:" + param.args[0] + ":" + param.args[1]);
+                    }
+                });
                 /*XposedHelpers.findAndHookMethod("com.uc.framework.a.i", loadPackageParam.classLoader, "handleMessage", Message.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
@@ -206,8 +227,8 @@ public class HookTest implements IXposedHookLoadPackage {
                     protected void afterHookedMethod(MethodHookParam param) throws Throwable {
 
                     }
-                });
-                XposedHelpers.findAndHookMethod("com.uc.application.infoflow.controller.InfoFlowController", loadPackageParam.classLoader, "handleMessageSync", Message.class, new XC_MethodHook() {
+                });*/
+                /*XposedHelpers.findAndHookMethod("com.uc.application.infoflow.controller.InfoFlowController", loadPackageParam.classLoader, "handleMessageSync", Message.class, new XC_MethodHook() {
                     protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
                         super.beforeHookedMethod(param);
                     }
@@ -232,5 +253,4 @@ public class HookTest implements IXposedHookLoadPackage {
     public static void sendBroadcast(Context context, String action, String key, String dataStr) {
         Util.sendBroadcast(context, action, key, dataStr);
     }
-
 }
