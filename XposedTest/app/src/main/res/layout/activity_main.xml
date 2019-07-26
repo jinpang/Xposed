@@ -1,78 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="10dp"
+    android:scrollbars="vertical"
     tools:context=".MainActivity">
 
-    <Switch
-        android:id="@+id/sw_open"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="是否开启UC Xposed"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="检查是否被劫持"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sw_open" />
+        <Switch
+            android:id="@+id/sw_open"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="是否开启UC Xposed"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/ed_index"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:hint="请输入UC首页列表哪条记录下标"
-        android:inputType="number"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button" />
-    <TextView
-        android:id="@+id/tv_save_path"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="UC内容保存的路径："
-        android:textColor="@android:color/holo_blue_light"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ed_index" />
-    <EditText
-        android:id="@+id/ed_storage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="默认路径：/storage/emulated/legacy"
-        android:inputType="text"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_save_path" />
-    <TextView
-        android:id="@+id/tv_system_path"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="系统路径："
-        android:textColor="@android:color/holo_blue_light"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/ed_storage" />
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="检查是否被劫持"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sw_open" />
 
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_system_path">
+        <EditText
+            android:id="@+id/ed_index"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:hint="请输入UC首页列表哪条记录下标"
+            android:inputType="number"
+            android:visibility="gone"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/button" />
 
+        <TextView
+            android:id="@+id/tv_save_path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="UC内容保存的文件固定为：123.txt，路径如下："
+            android:textColor="@android:color/holo_blue_light"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ed_index" />
+
+        <EditText
+            android:id="@+id/ed_storage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="默认路径：/storage/emulated/legacy"
+            android:inputType="text"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tv_save_path" />
+
+        <TextView
+            android:id="@+id/tv_system_path"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="系统路径："
+            android:textColor="@android:color/holo_blue_light"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ed_storage" />
+        <TextView
+            android:id="@+id/tv_content_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/the_end"
+            android:textColor="@android:color/holo_red_dark"
+            android:text="\n文件内容如下：\n"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
         <TextView
             android:id="@+id/content"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="结果"
+            android:layout_above="@+id/the_end"
+            android:text=""
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <TextView
+            android:id="@+id/the_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="center_horizontal"
+            android:text="---------我的有底线的------------"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/ed_index" />
-    </ScrollView>
-</androidx.constraintlayout.widget.ConstraintLayout>
+            app:layout_constraintTop_toBottomOf="@+id/content" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

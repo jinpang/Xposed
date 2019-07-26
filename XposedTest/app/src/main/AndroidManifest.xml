@@ -32,11 +32,11 @@
 
         <meta-data
             android:name="xposeddescription"
-            android:value="这是一个Xposed例程" />
+            android:value="UC浏览器内容收集插件" />
 
         <meta-data
             android:name="xposedminversion"
-            android:value="54" />
+            android:value="55" />
     </application>
 
 </manifest>

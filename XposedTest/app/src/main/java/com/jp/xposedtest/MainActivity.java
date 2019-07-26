@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.Editable;
+import android.text.Html;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
@@ -17,6 +18,11 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.jp.xposedtest.utils.PropertyUtil;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,13 +131,41 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(view.getContext(), "已复制", Toast.LENGTH_LONG).show();
             }
         });
+        tvResult.setText(readF1(etStorage.getText().toString() + "/123.txt"));
     }
 
     private String getSwitchStr() {
-        return "isOpen:" + swOpen.isChecked() + ", index:" + index + "\n" + title + "\n" + item;
+        return "isOpen:" + swOpen.isChecked() + /*", index:" + index + */"\n" + title + "\n" + item;
     }
 
     public String toastMessage() {
         return swOpen.isChecked() ? "UC已被劫持" : "UC未被劫持";
+    }
+
+
+    public static String readF1(String filePath) {
+        BufferedReader br = null;
+        StringBuffer buffer = new StringBuffer();
+        try {
+            br = new BufferedReader(new InputStreamReader( new FileInputStream(filePath)));
+            for (String line = br.readLine(); line != null; line = br.readLine()) {
+                //System.out.println(line);
+                buffer.append(line);
+                buffer.append("\n");
+            }
+            br.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            if (br != null){
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                br = null;
+            }
+        }
+        return buffer.toString();
     }
 }
