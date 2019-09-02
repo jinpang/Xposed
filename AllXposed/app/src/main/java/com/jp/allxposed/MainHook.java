@@ -1,5 +1,6 @@
 package com.jp.allxposed;
 
+import com.jp.allxposed.hook.DingPassHook;
 import com.jp.allxposed.hook.IqiyiHook;
 import com.jp.allxposed.hook.LocationHook;
 import com.jp.allxposed.hook.QQLiveHook;
@@ -25,5 +26,7 @@ public class MainHook implements IXposedHookLoadPackage {
         SgameHook.handleLoadPackage(loadPackageParam);
         //hook定位、imei
         LocationHook.handleLoadPackage(loadPackageParam);
+        //钉钉打卡
+        DingPassHook.handleLoadPackage(loadPackageParam);
     }
 }

@@ -4,6 +4,7 @@ android {
     compileSdkVersion 29
     buildToolsVersion "29.0.0"
     defaultConfig {
+        useLibrary 'org.apache.http.legacy'
         applicationId "com.jp.allxposed"
         minSdkVersion 15
         targetSdkVersion 29
@@ -29,4 +30,6 @@ dependencies {
     compileOnly 'de.robv.android.xposed:api:82'
     compileOnly 'de.robv.android.xposed:api:82:sources'
     implementation 'com.google.code.gson:gson:2.8.2'
+    api "com.afollestad.material-dialogs:core:0.9.4.5"
+    api "com.afollestad.material-dialogs:commons:0.9.4.5"
 }
